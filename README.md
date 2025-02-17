@@ -15,7 +15,7 @@
 
 # 全体構成図
 
-![Portfolio Image 1](https://github.com/masatoise/recomend-sample-client-masatoise/blob/image1/backend.drawio_client_1.png)
+![Image](https://github.com/user-attachments/assets/5f8a8bd6-809f-4aa2-8ae9-60ad02371267)
 
 
 
