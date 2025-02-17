@@ -176,3 +176,6 @@ dist
 
 # SvelteKit build / generate output
 .svelte-kit
+
+discogs_env
+ui-debug.log
