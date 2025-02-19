@@ -63,9 +63,9 @@ src
 </pre>
 
 # 画面説明
-1\. アーティストをマウスオーバーするとアーティスト詳細情報かそのアーティストに近いアーティストをボタンを押して表示させることができます
-![Image](https://github.com/user-attachments/assets/2b60c655-d550-40e6-a5ac-ac6e6a6001af)
-![Image](https://github.com/user-attachments/assets/ee331dcc-d53c-42ff-ad2d-78c9ca65163b)
-
+1\. アーティストをマウスオーバーするとアーティスト詳細情報かそのアーティストに近いアーティストをボタンを押して表示させることができます</br>
+![Image](https://github.com/user-attachments/assets/2b60c655-d550-40e6-a5ac-ac6e6a6001af)</br>
+![Image](https://github.com/user-attachments/assets/ee331dcc-d53c-42ff-ad2d-78c9ca65163b)</br>
+</br>
 2\. サジェスト検索</br>
 ![Image](https://github.com/user-attachments/assets/decc291e-41c8-43ff-b8bb-e6fdf86314ca)
