@@ -62,15 +62,10 @@ src
         index.js          #Vuexという状態管理をするフレームワークの設定ファイル
 </pre>
 
-#画面説明
-1\. メイン画面
-![Portfolio Image Main 1](https://github.com/masatoise/recomend-sample-client-masatoise/blob/image1/main1.png)
+# 画面説明
+1\. アーティストをマウスオーバーするとアーティスト詳細情報かそのアーティストに近いアーティストをボタンを押して表示させることができます
+![Image](https://github.com/user-attachments/assets/2b60c655-d550-40e6-a5ac-ac6e6a6001af)
+![Image](https://github.com/user-attachments/assets/ee331dcc-d53c-42ff-ad2d-78c9ca65163b)
 
-2\. アーティストをマウスオーバーするとアーティスト詳細情報かそのアーティストに近いアーティストをボタンを押して表示させることができます
-![Portfolio Image MouseOver](https://github.com/masatoise/recomend-sample-client-masatoise/blob/image1/main_mouse_over1.png)
-
-![Portfolio Image ArtistDetail](https://github.com/masatoise/recomend-sample-client-masatoise/blob/image1/detail1.png)
-
-![Portfolio Image NEIGHBOR](https://github.com/masatoise/recomend-sample-client-masatoise/blob/image1/neibor1.png)
-
-3\. サジェスト検索
+2\. サジェスト検索</br>
+![Image](https://github.com/user-attachments/assets/decc291e-41c8-43ff-b8bb-e6fdf86314ca)
