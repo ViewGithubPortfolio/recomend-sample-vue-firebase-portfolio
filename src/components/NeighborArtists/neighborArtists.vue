@@ -49,6 +49,7 @@
                                 v-if="hover"
                                 absolute
                                 color="#036358"
+                                :z-index="1"
                             >
                                 <v-row align="center">
                                 <v-col
@@ -73,7 +74,7 @@
 <script>
 import {buildURL,buildHeader,httpMethodsGET, fetchCli} from '../../lib/dataaccessclient' 
 import DB from '../../lib/dcx'
-import VUEX_DICT from '../../lib/utilyy'
+import {VUEX_DISPATCH_DICT,TOAST_CONF} from '../../lib/utilyy'
     export default{
         name:"neighborArtists",
         comments:{
@@ -122,24 +123,29 @@ import VUEX_DICT from '../../lib/utilyy'
                             this.main_disp = res["result"]
                             const jsonstr = JSON.stringify(this.main_disp)
                             DB.saveCachePage(jsonstr,toPAth,toPAth)
-                        }).catch(errr =>{
-                            console.error("Network someting error")
-                            console.log(errr)
-                            this.$store.dispatch('setErrorMessIsShowAction', true)
-                            this.$store.dispatch('setErrorMessBodyAction', errr)
-                        }).finally(()=>{
-                            
-                            this.$store.dispatch('setErrorMessIsShowAction', false)
+                        }).catch(
+                            (err_mess)=>{
+                                alert(err_mess)
+                                let err_mess_obj =null
+                                try{
+                                    
+                                    err_mess_obj = JSON.parse(err_mess)
+                                }catch{
+                                    err_mess_obj ={"status":"クライアントエラー","message":"クライアントエラー"}
+                                }
+                                let message_toast = err_mess_obj["message"]
+                                this.$toast.error(message_toast,TOAST_CONF);
+                            }     
+
+                        ).finally(()=>{
                             this.$store.dispatch('setIsSkeltonShowAction', false)
                         })
 
                     }
                 }).catch(err =>{
                     console.error("occured dexi error")
-                    this.$store.dispatch('setErrorMessIsShowAction', true)
-                    this.$store.dispatch('setErrorMessBodyAction', err)
+                    console.error(err)
                 }).finally(()=>{
-                    this.$store.dispatch('setErrorMessIsShowAction', false)
                     this.$store.dispatch('setIsSkeltonShowAction', false)
                 })
             },
@@ -163,7 +169,7 @@ import VUEX_DICT from '../../lib/utilyy'
                     }else{
                         res_json_li = res_json
                     }
-                    const vuex_dipatch = VUEX_DICT.VUEX_DISPATCH_DICT[toPath]
+                    const vuex_dipatch = VUEX_DISPATCH_DICT[toPath]
                     this.$store.dispatch(vuex_dipatch, res_json_li)
                     //
                     this.$router.push({path:toPath}).catch(function(err){
@@ -175,13 +181,19 @@ import VUEX_DICT from '../../lib/utilyy'
                     const toPath_not_slush = toPath.replace("/","")
                     DB.saveCachePage(jsonstr,fromPAth,toPath_not_slush,target_url)
                 }
-                ).catch(err =>{
-                    console.log(err)
-                    this.$store.dispatch('setErrorMessIsShowAction', true)
-                    this.$store.dispatch('setErrorMessBodyAction', err)
-                    this.$store.dispatch('setIsSkeltonShowAction', false)
-                }).finally(()=>{
-                    this.$store.dispatch('setErrorMessIsShowAction', false)
+                ).catch(
+                    (err_mess)=>{
+                        let err_mess_obj =null
+                        try{
+                            err_mess_obj = JSON.parse(err_mess)
+                        }catch{
+                            err_mess_obj ={"status":"クライアントエラー","message":"クライアントエラー"}
+                        }
+                            let message_toast = err_mess_obj["message"]
+                            this.$toast.error(message_toast,TOAST_CONF);
+                        }  
+
+                ).finally(()=>{
                     this.$store.dispatch('setIsSkeltonShowAction', false)
                 })
             },

@@ -83,6 +83,7 @@
                         <v-row>
                             <v-col v-for="release_record in artist_detail_result_vuex.releases" :key="release_record.discogs_releaseID">
                                 <v-card>
+                                   <!--{{ release_record }}-->
                                     <v-card-title>
                                         {{ release_record.artsitname_ja }} {{ release_record.artist_name_kakko_none_en  }}
                                     </v-card-title>
@@ -90,6 +91,7 @@
                                         {{ release_record.discogs_release_tile}}
                                     </v-card-title>
                                     <v-card-text>
+                                        <!--{{ release_record.release_video_img_url }}-->
                                         <div v-if="release_record.release_video_img_url !== 'N/A'" v-html="build_url_youtube_url(release_record.release_video_img_url)" > </div>
                                         <div v-else><v-img :src='require("@/assets/notexist.png")'></v-img></div>
                                     </v-card-text>
@@ -110,7 +112,7 @@
 <script>
 import {buildURL,buildHeader,httpMethodsGET, fetchCli} from '../../lib/dataaccessclient' 
 import DB from '../../lib/dcx'
-
+import TOAST_CONF from '../../lib/utilyy'
 export default{
     name:"artistDetail",
     comments:{
@@ -123,9 +125,7 @@ export default{
     },
     async created(){
         console.log("artist detail created")
-        if(this.$store.getters.artsit_detail_result ==null){
-            this.onloadartistDetailPage()
-        }
+        this.onloadartistDetailPage()
         
     },
     computed:{
@@ -134,7 +134,7 @@ export default{
         }
     },
     watch:{
-    
+       
     },
     methods:{
         onloadartistDetailPage(){
@@ -142,40 +142,44 @@ export default{
             const toPAth = tmppath.replace("/","")
             DB.getLatestSaveAtByCol("toPath",toPAth).then(li =>{
                     if(li.length >0){
+                        this.$store.dispatch('setIsSkeltonShowAction', true)
                         const tmp_res_json = li[0]
                         const temp = tmp_res_json["body"]
-                        
                         const dispJsonli = JSON.parse(temp)
-                        this.$store.dispatch( "setArtsit_detail_resultAction", dispJsonli)
+                        this.$store.dispatch( "setArtsit_detail_resultAction", dispJsonli[0])
                     }else{
+                        this.$store.dispatch('setIsSkeltonShowAction', true)
                         const mainUrl = buildURL(toPAth,{})
                         const infodict = buildHeader(httpMethodsGET)
-                        
+                       
                         fetchCli(mainUrl,infodict)
                         .then(res =>{
+                            this.main_disp = res["result"]
                             const maindisp = res["result"]
                             this.$store.dispatch( "setArtsit_detail_resultAction", maindisp)
                             const jsonstr = JSON.stringify(this.main_disp)
                             DB.saveCachePage(jsonstr,toPAth,toPAth)
-                        }).catch(errr =>{
-                            console.error("Network someting error")
-                            console.log(errr)
-                            this.$store.dispatch('setErrorMessIsShowAction', true)
-                            this.$store.dispatch('setErrorMessBodyAction', errr)
-                            this.$store.dispatch('setIsSkeltonShowAction', false)
-                        }).finally(()=>{
-                            this.$store.dispatch('setErrorMessIsShowAction', false)
+                        }).catch(
+                            (err_mess)=>{
+                                let err_mess_obj =null
+                                try{
+                                    err_mess_obj = JSON.parse(err_mess)
+                                }catch{
+                                    err_mess_obj ={"status":"クライアントエラー","message":"クライアントエラー"}
+                                }
+                                let message_toast = err_mess_obj["message"]
+                                this.$toast.error(message_toast,TOAST_CONF);
+                            }    
+                        ).finally(()=>{
+                            console.log("artistDetail ==>> finally")
                             this.$store.dispatch('setIsSkeltonShowAction', false)
                         })
 
                     }
-                }).catch(err =>{
+                }).catch(() =>{
                     console.error("occured dexi error")
-                    this.$store.dispatch('setErrorMessIsShowAction', true)
-                    this.$store.dispatch('setErrorMessBodyAction', err)
-                    this.$store.dispatch('setIsSkeltonShowAction', false)
+                   
                 }).finally(()=>{
-                    this.$store.dispatch('setErrorMessIsShowAction', false)
                     this.$store.dispatch('setIsSkeltonShowAction', false)
                 })
        

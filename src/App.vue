@@ -44,6 +44,7 @@
 import {buildURL, fetchCli,buildHeader,httpMethodsGET} from './lib/dataaccessclient' 
 import DB from './lib/dcx'
 import SkeltonVue from './components/partsVue/skeletonloaderVue.vue'
+import TOAST_CONF from './lib/utilyy'
 export default {
   name: 'App',
 
@@ -51,13 +52,14 @@ export default {
     SkeltonVue
   },
   created(){
-    
+    console.log("APP VUE ==>> created")
   },
   mounted(){
-    
+    console.log("APP VUE ==>> mounted")
   },
   destroyed(){
-    
+    //alert("APP VUE ==>> Destory")
+    console.log("APP VUE ==>> Destory")
   },
   data () {
     return {
@@ -82,14 +84,12 @@ export default {
       )
     },
     isSkeltonShow_vuex(){
-      alert(this.$store.getters.isSkeltonShow)
       return this.$store.getters.isSkeltonShow
     }
 
   },
   watch: {
     async search (val) {
-      
       const w_size = val.length
       if(w_size <1) return
       const param_d = {'suggest': val}
@@ -108,16 +108,16 @@ export default {
           }
       ).catch(err_mess=>{
         console.log(err_mess)
-        this.$store.dispatch('setErrorMessIsShowAction', true)
-        this.$store.dispatch('setErrorMessBodyAction', err_mess)
+        
       }).finally(()=>{
-        this.$store.dispatch('setErrorMessIsShowAction', false)
+        console.log("suggest click ==>> finaly")
       })
     
     },
   },
   methods:{
     async searchNnResult(data){
+      this.$store.dispatch('setIsSkeltonShowAction', true)
       const artistID = data["discogs_artist_id"]
       const artistName = data["artist_name_origine"]
       const artist_name_ja = data["artist_name_trance_remove_kakko"]
@@ -131,21 +131,26 @@ export default {
       fetchCli(target_url,infodict)
       .then(
         result =>{
-          alert(JSON.stringify(result))
-          this.$store.dispatch('setSuggestResultAction', result)
-          this.$router.push({path:"/suggestResult"})
+          this.$store.dispatch('setSuggestResultAction', result[0])
+          this.$router.push({path:"/suggestResult"}).catch(()=>{})
           const resultStr = JSON.stringify(result)
           DB.saveCachePage(resultStr,"suggest","suggestResult",target_url)
         }
       ).catch(
         (err_mess)=>{
-          console.log(err_mess)
-          this.$store.dispatch('setErrorMessIsShowAction', true)
-          this.$store.dispatch('setErrorMessBodyAction', err_mess)
-        }
+              let err_mess_obj =null
+              try{
+                  err_mess_obj = JSON.parse(err_mess)
+              }catch{
+                  err_mess_obj ={"status":"クライアントエラー","message":"クライアントエラー"}
+              }
+              let message_toast = err_mess_obj["message"]
+              this.$toast.error(message_toast,TOAST_CONF);
+          }  
       ).finally(
         ()=>{
-          this.$store.dispatch('setErrorMessIsShowAction', false)
+          this.$store.dispatch('setIsSkeltonShowAction', false)
+          console.log("searchNnResult serchNNresult ==>> finalyy")        
         } 
       )
      

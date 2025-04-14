@@ -1,6 +1,9 @@
 /** */
-const baseUrl_test = "http://localhost:3333"
+const baseUrl_test = "https://dubdubjazzrecomendsamplebackend.net"
+//const baseUrl_test = "http://localhost:3333"
 const httpMethodsGET="GET"
+
+
 
 
 const buildURL =(targetPath,param_d)=>{
@@ -40,18 +43,21 @@ const  fetchCli = async (url,headers) =>{
             switch (response.status) {
                 case 400:
                     console.error("fetchCli ==>> 400 error")
-                    throw new Error(jsonToDict({"status":"400","message":"fetchCli ==>> 400 error"}));
+                    throw new Error(jsonToDict({"status":"400","message":"一般的なクライアントエラー"}));
                 case 401:
                     console.error("fetchCli ==>> 401 error")
-                    throw new Error(jsonToDict({"status":"401","message":"fetchCli ==>> 401 error"}));
+                    throw new Error(jsonToDict({"status":"401","message":"アクセス権がありません"}));
                 case 404:
                     console.error("fetchCli ==>> 404 error")
-                    throw new Error(jsonToDict({"status":"404","message":"fetchCli ==>> 404 error"}));
+                    throw new Error(jsonToDict({"status":"404","message":"Webページが見つからない"}));
                 case 500:
                     console.error("fetchCli ==>> 500 error")
-                    throw new Error(jsonToDict({"status":"500","message":"fetchCli ==>> 500 error"}));
+                    throw new Error(jsonToDict({"status":"500","message":"何らかのサーバーエラーが起きています"}));
+                case 501:
+                    console.error("fetchCli ==>> 501 error")
+                    throw new Error(jsonToDict({"status":"501","message":"情報がみつかりませんでした"}));
                 default:
-                  throw new Error(jsonToDict({"status":"NonClear","message":"fetchCli ==>> NetWork NonClear error"}));
+                  throw new Error(jsonToDict({"status":"NonClear","message":"不明なエラーがおきてます"}));
             }
         }
 

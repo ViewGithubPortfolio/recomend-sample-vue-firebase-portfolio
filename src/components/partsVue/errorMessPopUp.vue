@@ -34,6 +34,7 @@ export default {
 </script>
 <style lang="css" scoped>
 .popupl {
+    /* ポップアップウィンドウのスタイル */
     position: fixed;
     top: 5%;
     left: 15%;

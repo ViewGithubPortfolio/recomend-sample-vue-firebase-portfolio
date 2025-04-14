@@ -39,6 +39,7 @@
                 sm="10"
             >
                 <v-sheet>
+
                     <v-card>
                         <v-card-title>
                             {{ suggest_result_vuex.artist_name_trance_remove_kakko_ja }}
@@ -92,6 +93,7 @@
                         <v-row>
                             <v-col v-for="release_record in suggest_result_vuex.releases" :key="release_record.discogs_releaseID">
                                 <v-card>
+                                   <!--{{ release_record }}-->
                                     <v-card-title>
                                         {{ release_record.artist_name_trance_remove_kakko_ja }} {{ release_record.artist_name_kakko_none_en  }}
                                     </v-card-title>
@@ -120,7 +122,8 @@
 <script>
 import {buildURL,buildHeader,httpMethodsGET, fetchCli} from '../../lib/dataaccessclient' 
 import DB from '../../lib/dcx'
-import VUEX_DICT from '../../lib/utilyy'
+import {VUEX_DISPATCH_DICT,TOAST_CONF} from '../../lib/utilyy'
+
     export default{
         name:'suggestResult',
         components:{
@@ -133,13 +136,7 @@ import VUEX_DICT from '../../lib/utilyy'
         },
         created(){
             console.log("Suggest Result Created")
-            if(this.$store.getters.suggestResult ==null){
-                this.onloadSuggestResultPage()
-            }else{
-                //alert("===========================================================")
-            }
-            
-            
+            this.onloadSuggestResultPage()
         },
         computed:{
             suggest_result_vuex(){
@@ -151,55 +148,59 @@ import VUEX_DICT from '../../lib/utilyy'
                 let tmppath =window.location.pathname
                 const toPAth = tmppath.replace("/","")
                 DB.getLatestSaveAtByCol("toPath",toPAth).then(li =>{
+                    this.$store.dispatch('setIsSkeltonShowAction', true)
                     if(li.length >0){
-                        //alert(JSON.stringify(li))
                         const tmp_res_json = li[0]
                         const temp = tmp_res_json["body"]
                         const dispJson = JSON.parse(temp)
-                        const vuex_dipatch = VUEX_DICT.VUEX_DISPATCH_DICT["/suggestResult"]
-                    
-                        this.$store.dispatch(vuex_dipatch, dispJson)
+                        const vuex_dipatch = VUEX_DISPATCH_DICT["/suggestResult"]
+                        this.$store.dispatch(vuex_dipatch, dispJson[0])
                         
                     }else{
+                        this.$store.dispatch('setIsSkeltonShowAction', true)
                         const mainUrl = buildURL(toPAth,{})
                         const infodict = buildHeader(httpMethodsGET)
-                        this.$store.dispatch('setIsSkeltonShowAction', true)
                         fetchCli(mainUrl,infodict)
                         .then(res =>{
                             const main_disp = res["result"]
                             const jsonstr = JSON.stringify(main_disp)
 
-                            const vuex_dipatch = VUEX_DICT.VUEX_DISPATCH_DICT["/suggestResult"]
-                            //target_url 
-                            this.$store.dispatch(vuex_dipatch, main_disp)
+                            const vuex_dipatch = VUEX_DISPATCH_DICT["/suggestResult"]
+                            this.$store.dispatch(vuex_dipatch, main_disp[0])
                             
 
                             DB.saveCachePage(jsonstr,toPAth,toPAth,)
-                        }).catch(errr =>{
-                            console.error("Network someting error")
-                            console.error(errr)
-                            this.$store.dispatch('setErrorMessIsShowAction', true)
-                            this.$store.dispatch('setErrorMessBodyAction', "Network someting error")
-                        }).finally(()=>{
-                            this.$store.dispatch('setIsSkeltonShowAction', true)
-                            this.$store.dispatch('setErrorMessIsShowAction', false)
+                        }).catch(
+                                (err_mess)=>{
+                                    let err_mess_obj =null
+                                    try{
+                                        err_mess_obj = JSON.parse(err_mess)
+                                    }catch{
+                                        err_mess_obj ={"status":"クライアントエラー","message":"クライアントエラー"}
+                                    }
+                                    let message_toast = err_mess_obj["message"]
+                                    this.$toast.error(message_toast,TOAST_CONF);
+                                }    
+
+                        ).finally(()=>{
+                            console.log("finally")
+                            this.$store.dispatch('setIsSkeltonShowAction', false)
                         })
 
                     }
                 }).catch(err =>{
                     console.error("occured dexi error")
                     console.error(err)
-                    this.$store.dispatch('setErrorMessIsShowAction', true)
-                    this.$store.dispatch('setErrorMessBodyAction', "occured dexi error")
-                }).finally(()=>{
-                    this.$store.dispatch('setErrorMessIsShowAction', false)
-                })
+                }).finally(
+                    () =>{
+                        this.$store.dispatch('setIsSkeltonShowAction', false)
+                    }
+                )
             },
             build_url_youtube_url(val){
                 const emb_url = val["emb_url"]
                 const img_url = val["img_url"]
                 const a_tag = '<a target="_blank" href="'+emb_url+'"><img src="' +img_url+'"</a>'
-                //alert(a_tag)
                 return a_tag
             },
             build_img_tag(val){
@@ -210,9 +211,8 @@ import VUEX_DICT from '../../lib/utilyy'
                 this.$router.back(-1)
             },
             slotOnFetchData(record) {
-                //alert(JSON.stringify(record))
                 const toPath ="/neighborArtists"
-                //const record = this.$store.getters.suggestResult
+                
                 const artistID = record["artistID"]
                 const artistName = record["artist_name_kakko_none_en"]
                 const artist_name_ja = record["artsitname_ja"]
@@ -221,22 +221,14 @@ import VUEX_DICT from '../../lib/utilyy'
                     "artist_name_kakko_none_en":artistName,
                     "artistID":artistID
                 }
-                alert(JSON.stringify(param_d))
                 const target_url = buildURL(toPath,param_d)
                 const infodict = buildHeader(httpMethodsGET)
                 this.$store.dispatch('setIsSkeltonShowAction', true)
                 fetchCli(target_url,infodict).then(
                     res_json =>{
-                        alert(JSON.stringify(res_json))
                         let resli ={}
-                        if(toPath === "/neighborArtists"){
-                            resli = res_json["nn_neighbor_artist_result"]
-                        }else{
-                            resli = res_json
-                        }
-
-                        const vuex_dipatch = VUEX_DICT.VUEX_DISPATCH_DICT[toPath]
-                        alert(vuex_dipatch)
+                        resli = res_json["nn_neighbor_artist_result"]
+                        const vuex_dipatch = VUEX_DISPATCH_DICT[toPath]
                         this.$store.dispatch(vuex_dipatch, resli)
                         this.$router.push({path:toPath}).catch(function(err){
                             console.error(err)
@@ -247,13 +239,19 @@ import VUEX_DICT from '../../lib/utilyy'
                         const toPath_not_slush = toPath.replace("/","")
                         DB.saveCachePage(jsonstr,fromPAth,toPath_not_slush,target_url)
                     }
-                    ).catch(err =>{
-                        console.log(err)
-                        this.$store.dispatch('setErrorMessIsShowAction', true)
-                        this.$store.dispatch('setErrorMessBodyAction', err)
-                        this.$store.dispatch('setIsSkeltonShowAction', false)
-                    }).finally(()=>{
-                        this.$store.dispatch('setErrorMessIsShowAction', false)
+                    ).catch(
+                        (err_mess)=>{
+                            let err_mess_obj =null
+                                try{
+                                    err_mess_obj = JSON.parse(err_mess)
+                                }catch{
+                                    err_mess_obj ={"status":"クライアントエラー","message":"クライアントエラー"}
+                                }
+                                let message_toast = err_mess_obj["message"]
+                                this.$toast.error(message_toast,TOAST_CONF);
+                            }     
+                    ).finally(()=>{
+                        console.log("slotOnFetchData suggest ==>> finally")
                         this.$store.dispatch('setIsSkeltonShowAction', false)
                     })
             },

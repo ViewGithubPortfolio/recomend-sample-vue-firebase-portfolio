@@ -82,6 +82,7 @@ const getLatestSaveAtByCol = (target_col_name,condition) =>{
 
 
 const deleteCachePageOne = (condition_id)=>{
+  //alert(condition_id)
   return db.cachePage.delete(condition_id)
 }
 

@@ -18,6 +18,7 @@
                       
                     </v-card-text>
                     <v-card-title>ALIAS</v-card-title>
+                    <!--<v-card-text>-->
                     <v-card-title>
                       <div v-for="arist_alias_record in record.artist_alias" :key="arist_alias_record.artistAliasID">
                         <v-chip variant="flat" size="small" color="red">
@@ -51,6 +52,7 @@
                         v-if="hover"
                         absolute
                         color="#036358"
+                        :z-index="1"
                       >
                         <v-row align="center">
                           <v-col
@@ -76,7 +78,7 @@
 <script>
 import {buildURL,buildHeader,httpMethodsGET, fetchCli} from '../../lib/dataaccessclient' 
 import DB from '../../lib/dcx'
-import VUEX_DICT from '../../lib/utilyy'
+import {VUEX_DISPATCH_DICT,TOAST_CONF} from '../../lib/utilyy'
 export default {
     name:"main_vue",
     components:{
@@ -93,21 +95,20 @@ export default {
      
     },
     destroyed(){
-      //alert("Main Destory")
+      console.log("Maion destroy")
     },
     methods:{
       onloadMainPage(){
-
         let tmppath =window.location.pathname
         const toPAth = tmppath.replace("/","")
         DB.getLatestSaveAtByCol("toPath",toPAth).then(li =>{
             if(li.length >0){
+              this.$store.dispatch('setIsSkeltonShowAction', true)
               const tmp_res_json = li[0]
               const temp = tmp_res_json["body"]
               const dispJsonli = JSON.parse(temp)
-              alert(JSON.stringify(dispJsonli))
               this.main_disp = dispJsonli
-
+              
             }else{
               
               const mainUrl = buildURL(toPAth,{})
@@ -120,23 +121,31 @@ export default {
                 const jsonstr = JSON.stringify(this.main_disp)
                 DB.saveCachePage(jsonstr,toPAth,toPAth)
               
-              }).catch(errr =>{
-                console.error("Network someting error")
-                console.log(errr)
-                this.$store.dispatch('setErrorMessBodyAction', errr)
-              }).finally(()=>{
+              }).catch(
+                (err_mess)=>{
+                    let err_mess_obj =null
+                    try{
+                      err_mess_obj = JSON.parse(err_mess)
+                    }catch{
+                      err_mess_obj ={"status":"クライアントエラー","message":"クライアントエラー"}
+                    }
+                    let message_toast = err_mess_obj["message"]
+                    this.$toast.error(message_toast,TOAST_CONF);
+                }      
+              ).finally(()=>{
+                console.log("main vue finnaly")
                 this.$store.dispatch('setIsSkeltonShowAction', false)
               })
 
             }
         }).catch(err =>{
           console.error("occured dexi error")
-          this.$store.dispatch('setErrorMessBodyAction', err)
+          console.error(err)
+        
         }).finally(()=>{
+          console.log("dexi main vue finnaly")
           this.$store.dispatch('setIsSkeltonShowAction', false)
         })
-       
-      
       }, 
       build_img_tag(val){
           const img_str ="<img src=\"" + val+"\">"
@@ -163,25 +172,31 @@ export default {
             }else{
               resss = res_json
             }
-            const vuex_dipatch = VUEX_DICT.VUEX_DISPATCH_DICT[toPath]
-            
+            const vuex_dipatch = VUEX_DISPATCH_DICT[toPath]
             this.$store.dispatch(vuex_dipatch, resss)
             this.$router.push({path:toPath}).catch(function(err){
                         console.error(err)
                     })
+           
             const jsonstr = JSON.stringify(res_json)
             let tmppath =window.location.pathname
             const fromPAth = tmppath.replace("/","")
             const toPath_not_slush = toPath.replace("/","")
             DB.saveCachePage(jsonstr,fromPAth,toPath_not_slush,target_url)
           }
-        ).catch(err =>{
-          console.log(err)
-          this.$store.dispatch('setErrorMessIsShowAction', true)
-          this.$store.dispatch('setErrorMessBodyAction', err)
-        }).finally(()=>{
-          this.$store.dispatch('setErrorMessIsShowAction', false)
-          //
+        ).catch(
+            (err_mess)=>{
+              let err_mess_obj =null
+                try{
+                  err_mess_obj = JSON.parse(err_mess)
+                }catch{
+                  err_mess_obj ={"status":"クライアントエラー","message":"クライアントエラー"}
+                }
+                let message_toast = err_mess_obj["message"]
+                this.$toast.error(message_toast,TOAST_CONF);
+            }    
+        ).finally(()=>{
+          console.log("main ==>>> slotOnFetchData ==>> finally")
           this.$store.dispatch('setIsSkeltonShowAction', false)
 
           

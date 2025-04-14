@@ -4,12 +4,15 @@ import vuetify from './plugins/vuetify'
 import store from './store'
 import router from './router'
 import AsyncComputed from 'vue-async-computed'
+// vue toast
+import vueToast from 'vue-toast-notification';
+import 'vue-toast-notification/dist/theme-sugar.css';
 
+Vue.use(vueToast);
 import ja from 'vuetify/es5/locale/ja.js'
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getFirestore,connectFirestoreEmulator } from "firebase/firestore";
 
 
 // Your web app's Firebase configuration
@@ -23,9 +26,8 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-connectFirestoreEmulator(db, '', 6080);
+initializeApp(firebaseConfig);
+
 Vue.config.productionTip = false
 
 
